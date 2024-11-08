@@ -3,6 +3,7 @@ package DI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,24 +24,21 @@ public class DefaultSecurityConfig {
     @Order(1)
     SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .oidc(Customizer.withDefaults()); // Enable OpenID Connect 1.0
 
-        // generate a default form login page:
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .oidc(Customizer.withDefaults());
+
         return http.formLogin(Customizer.withDefaults()).build();
     }
 
     @Bean
     @Order(2)
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest()
-                        .authenticated())
+        http.authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults());
         return http.build();
     }
 
-    // define a set of example users - use for testing
-    // create a repository with just a single admin user
     @Bean
     UserDetailsService users() {
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
